@@ -156,7 +156,7 @@ import { utils, read, writeFile } from 'xlsx'
         workbook.SheetNames.forEach(item => {
           const data = utils.sheet_to_json(workbook.Sheets[item]).map((item:any,index: number) => ({
             ...item,
-            "区服": item["区服"].slice(0,3),
+            "区服": String(item["区服"]).substring(0,3),
             count: index+1
           }))
           result.push({
