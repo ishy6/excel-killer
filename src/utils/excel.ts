@@ -153,10 +153,15 @@ import { utils, read, writeFile } from 'xlsx'
           type: 'binary'
         })
         const result: any = []
-        workbook.SheetNames.forEach((item) => {
+        workbook.SheetNames.forEach(item => {
+          const data = utils.sheet_to_json(workbook.Sheets[item]).map((item:any,index: number) => ({
+            ...item,
+            "区服": item["区服"].slice(0,3),
+            count: index+1
+          }))
           result.push({
             sheetName: item,
-            data: utils.sheet_to_json(workbook.Sheets[item])
+            data: data
           })
         })
         resolve(result)
