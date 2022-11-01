@@ -20,12 +20,12 @@
               </a-button> -->
             </div>
         </div>
-        <a-table :scroll="{x: true, y: '600px'}" :dataSource="excelList" :columns="columns" />
+        <a-table :scroll="{x: true, y: '600px'}" :dataSource="excelList" :columns="columns" :pagination="pagination" @change="handlePageChange" />
     </div>
 </template>
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { importExcel, exportExcel, file2Excel } from '../utils/excel'
+import { exportExcel, file2Excel } from '../utils/excel'
 
 export default defineComponent({
     setup() {
@@ -36,6 +36,10 @@ export default defineComponent({
         let promiseList: Array<any> = []
         let exportData: (String[] | null)[] = []
         const columns = ref();
+        const pagination = ref({
+            current: 1,
+            pageSize: 20
+        })
         /**
          * 导出
          */
@@ -76,7 +80,9 @@ export default defineComponent({
                     key: v,
                     fixed: v === '用户名',
                     width: 120,
-                    resizable: true
+                    resizable: true,
+                    sorter: (a: any, b: any) => a[v] - b[v],
+                    sortDirections: ['ascend','descend'],
                 }))
                 pkgExcelList = [...list]
                 list = handleCalcTotal(list)
@@ -125,14 +131,22 @@ export default defineComponent({
           count.value = 0
           handleFilter()
         }
+        /**
+         * 选择分页
+         */
+        const handlePageChange = (val: any) => {
+            pagination.value = val
+        }
         return {
           count,
           excelList,
           columns,
           fileRef,
+          pagination,
           resetData,
           handleReset,
           handleFilter,
+          handlePageChange,
           handleBatchImport,
           exportExcelFromTable
         }
