@@ -3,10 +3,11 @@
         <div class="header">
             <div>
               账号序号：<a-input-number id="inputNumber" v-model:value="count" :min="0" />
-              <a-button style="margin-left: 16px" type="primary" @click="handleFilter">
+              <a-input v-model:value="account" style="width: 200px;margin-left: 16px;" placeholder="请输入账号"></a-input>
+              <a-button class="ml16" type="primary" @click="handleFilter">
                   筛选
               </a-button>
-              <a-button style="margin-left: 16px" type="default" @click="handleReset">
+              <a-button class="ml16" type="default" @click="handleReset">
                   重置
               </a-button>
             </div>
@@ -30,6 +31,7 @@ import { exportExcel, file2Excel } from '../utils/excel'
 export default defineComponent({
     setup() {
         const count = ref(0);
+        const account = ref();
         const fileRef = ref();
         const excelList = ref([])
         let pkgExcelList: any[] = []
@@ -51,6 +53,7 @@ export default defineComponent({
          */
         const resetData = () => {
             count.value = 0
+            account.value = ''
             excelList.value = []
             promiseList = []
             // 清除input选择的file
@@ -117,6 +120,11 @@ export default defineComponent({
               return item.count == count.value
             }
             return true
+          }).filter((item: any) => {
+            if (account.value) {
+                return item['账号'] === account.value
+            }
+            return true
           })
           if (list.length) {
             excelList.value = handleCalcTotal(list)
@@ -129,6 +137,7 @@ export default defineComponent({
          */
         const handleReset = () => {
           count.value = 0
+          account.value = ''
           handleFilter()
         }
         /**
@@ -139,6 +148,7 @@ export default defineComponent({
         }
         return {
           count,
+          account,
           excelList,
           columns,
           fileRef,
@@ -163,5 +173,8 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     height: 54px;
+}
+.ml16 {
+    margin-left: 16px;
 }
 </style>
