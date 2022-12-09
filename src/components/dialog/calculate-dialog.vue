@@ -10,19 +10,19 @@
     @ok="handleOk"
     @cancel="handleCancel"
   >
-    粮食：<a-input-number v-model:value="resObj.food" :min="0" /> 木材：<a-input-number
+    粮食：<a-input-number v-model:value="resObj.food" :min="0" /> 木头：<a-input-number
       v-model:value="resObj.wood"
       :min="0"
     />
-    钢铁：<a-input-number v-model:value="resObj.steel" :min="0" /> 汽油：<a-input-number
+    铁矿：<a-input-number v-model:value="resObj.steel" :min="0" /> 汽油：<a-input-number
       v-model:value="resObj.gas"
       :min="0"
     />
     <span class="ml12">税率：</span>
     <a-input-number
       v-model:value="resObj.tax"
-      :formatter="(v) => `${v}%`"
-      :parser="(v) => v.replace('%', '')"
+      :formatter="(v: any) => `${v}%`"
+      :parser="(v: string) => v.replace('%', '')"
       :min="0"
       :max="100"
     />
@@ -34,7 +34,6 @@
       :dataSource="tableData"
       :columns="columns"
       :pagination="false"
-      @change="handlePageChange"
     />
   </a-modal>
 </template>
@@ -188,13 +187,6 @@ export default defineComponent({
       console.log(accountList, tableData.value, exchangeObj);
     };
 
-    /**
-     * 选择分页
-     */
-    const handlePageChange = (val: any) => {
-      pagination.value = val;
-    };
-
     const handleOk = () => {
       ctx.emit("update:value", false);
     };
@@ -209,8 +201,7 @@ export default defineComponent({
       tableData,
       handleOk,
       handleCancel,
-      handleCalculate,
-      handlePageChange,
+      handleCalculate
     };
   },
 });
