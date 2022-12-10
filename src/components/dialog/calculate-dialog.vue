@@ -51,7 +51,7 @@ export default defineComponent({
     },
   },
   setup(props, ctx) {
-    let selectDataList: any = [];
+    let selectRowList: any = [];
     const visible = ref<boolean>(props.value);
     const tableData: any = ref([]);
     const columns = ref();
@@ -80,13 +80,13 @@ export default defineComponent({
       (v) => {
         visible.value = v;
         if (v) {
-          selectDataList = [];
+          selectRowList = [];
           props.selectedRows.forEach((item) => {
             // 把稀土比例化
             let rowData: any = JSON.parse(JSON.stringify(toRaw(item)));
             rowData["稀土"] = rowData["稀土"] * 200;
             // 取出源数据
-            selectDataList.push(rowData);
+            selectRowList.push(rowData);
           });
         }
       }
@@ -102,6 +102,7 @@ export default defineComponent({
       const exchangeObj = {}; // 各个账号兑换资源的数量
       const targetResObj = {}; // 各个资源需要兑换的数量
       const resRawData = toRaw(resObj);
+      const selectDataList = JSON.parse(JSON.stringify(selectRowList)) // 选中的数据拷贝
 
       // 计算各个资源需要兑换的数量
       const keyList = Object.keys(resRawData).slice(0, 4);
@@ -128,11 +129,13 @@ export default defineComponent({
       for (let key in targetResObj) {
         if (totalObj[key] < targetResObj[key]) {
           selectDataList.forEach((item: Object, index: number) => {
-            // 计算低于平均分摊资源的账号数目
-            const targetAvg = (targetResObj[key] / (selectDataList.length - index)).toFixed(2);
+            // 计算需要进行分摊资源的账号数目，资源越多分摊的几率越低
+            const judgeAvg = (targetResObj[key] / (selectDataList.length - index)).toFixed(2);
+
+            // const judgeAvg = (totalObj[key] / selectDataList.length).toFixed(2);
             let count = 0;
             selectDataList.slice(index).forEach((item: Object) => {
-              if (item[fieldMap[key]] < targetAvg) {
+              if (item[fieldMap[key]] < judgeAvg) {
                 count++;
               }
             });
@@ -142,14 +145,14 @@ export default defineComponent({
             // 超出稀土资源的逻辑处理
             const actualExchangeNumber = item["稀土"] >= targetExchangeNumber ? targetExchangeNumber : item["稀土"];
             exchangeObj[item["账号"]] = exchangeObj[item["账号"]] ?? {};
-            exchangeObj[item["账号"]][fieldMap[key] == "金币" ? "汽油" : fieldMap[key]] = actualExchangeNumber;
+            exchangeObj[item["账号"]][fieldMap[key] == "金币" ? "汽油" : fieldMap[key]] = item[fieldMap[key]] < judgeAvg ? actualExchangeNumber : '-';
             // 选中的账号的资源数量对应修改
-            item["稀土"] -= actualExchangeNumber;
-            item[fieldMap[key]] = Number(
+            item["稀土"] = item["稀土"] - (item[fieldMap[key]] < judgeAvg ? actualExchangeNumber : 0);
+            item[fieldMap[key]] = item[fieldMap[key]] < judgeAvg ? Number(
               (item[fieldMap[key]] + (actualExchangeNumber * exchangeRate[key]) / 200).toFixed(2)
-            );
+            ) : item[fieldMap[key]];
             // 总数对应修改
-            totalObj[key] = Number((totalObj[key] + (actualExchangeNumber * exchangeRate[key]) / 200).toFixed(2));
+            totalObj[key] = item[fieldMap[key]] < judgeAvg ? Number((totalObj[key] + (actualExchangeNumber * exchangeRate[key]) / 200).toFixed(2)) : totalObj[key];
           });
         } else {
           selectDataList.forEach((item: Object) => {
@@ -184,7 +187,7 @@ export default defineComponent({
         resizable: true,
       }));
 
-      console.log(accountList, tableData.value, exchangeObj);
+      console.log(totalObj,targetResObj, tableData.value, exchangeObj);
     };
 
     const handleOk = () => {
