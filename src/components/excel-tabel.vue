@@ -3,7 +3,7 @@
     <div class="header">
       <div>
         账号序号：<a-input-number id="inputNumber" v-model:value="count" :min="0" />
-        <a-input v-model:value="account" style="width: 200px; margin-left: 16px" placeholder="请输入账号"></a-input>
+        <a-input v-model:value="account" style="width: 200px; margin-left: 16px" placeholder="请输入账号或游戏昵称"></a-input>
         <a-button class="ml16" type="primary" @click="handleFilter"> 筛选 </a-button>
         <a-button class="ml16" type="default" @click="handleReset"> 重置 </a-button>
         <a-button class="ml16" type="primary" @click="handleCalculate">
@@ -162,7 +162,7 @@ export default defineComponent({
         })
         .filter((item: any) => {
           if (account.value) {
-            return item["账号"] === account.value;
+            return item["账号"] === account.value || item["游戏昵称"] === account.value;
           }
           return true;
         });
