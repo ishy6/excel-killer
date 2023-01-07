@@ -157,10 +157,10 @@ import { utils, read, writeFile } from 'xlsx'
           const data = utils.sheet_to_json(workbook.Sheets[item]).map((item:any,index: number) => ({
             ...item,
             // 加上区号
-            "区服": item["区服"].split('-')[0],
+            "区服": String(item["区服"]).split('-')[0],
             // 窗口号
             "窗口": file?.webkitRelativePath?.split('/')?.slice(-2)[0],
-            "游戏昵称": item["区服"].split('-')[1],
+            "游戏昵称": String(item["区服"]).split('-')[1],
             count: index+1
           }))
           result.push({
